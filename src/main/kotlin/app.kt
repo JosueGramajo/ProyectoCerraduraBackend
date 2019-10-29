@@ -23,7 +23,7 @@ fun main() {
             post("/registerUser") {
                 val req = call.receive<RegisterRequest>()
 
-                GeneralDao.insertUser(req.name, req.id)
+                GeneralDao.insertUser(req.name, req.biometricID)
 
                 call.respondText("Su solicitud de registro fue enviada al administrador, debera esperar a que la acepte")
             }
@@ -33,8 +33,24 @@ fun main() {
                 println(resp)
                 call.respondText { resp }
             }
-            get("/test"){
+            post("/changeUserState"){
+                val req = call.receive<ChangeState>()
 
+                GeneralDao.changeUserState(req.biometricID, req.user_state)
+
+                call.respondText { "El estado del usuario fue cambiado exitosamente" }
+            }
+            get("/insertLog"){
+                val queryParameters = call.request.queryParameters
+
+                GeneralDao.insertLog(
+                    queryParameters.get("name")!!,
+                    queryParameters.get("date")!!,
+                    queryParameters.get("time")!!,
+                    queryParameters.get("event")!!
+                )
+
+                call.respondText { "success" }
             }
         }
     }
@@ -43,7 +59,12 @@ fun main() {
 
 data class RegisterRequest(
         val name : String,
-        val id : String
+        val biometricID : String
 ){
     constructor() : this("","")
 }
+
+data class ChangeState(
+    val biometricID : String,
+    val user_state : String
+)
