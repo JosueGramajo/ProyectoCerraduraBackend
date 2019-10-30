@@ -10,6 +10,9 @@ import io.ktor.server.netty.*
 import io.ktor.jackson.jackson
 import io.ktor.request.receiveText
 import io.ktor.response.respondText
+import objects.ChangeState
+import objects.LogData
+import objects.RegisterRequest
 
 fun main() {
 
@@ -56,28 +59,17 @@ fun main() {
 
                 call.respondText { "success" }
             }
+            post("/getPendingUsers"){
+                val json = GeneralDao.getPendingUsers()
+
+                call.respondText { json }
+            }
+            post("/getLogs"){
+                val json = GeneralDao.getLogs()
+
+                call.respondText { json }
+            }
         }
     }
     server.start(wait = true)
-}
-
-data class RegisterRequest(
-        val name : String,
-        val biometricID : String
-){
-    constructor() : this("","")
-}
-
-data class ChangeState(
-    val biometricID : String,
-    val user_state : String
-)
-
-data class LogData(
-        val name : String,
-        val time : String,
-        val date : String,
-        val status : String
-){
-    constructor() : this("","","","")
 }
