@@ -2,7 +2,8 @@ package objects
 
 data class RoleAndStatus(
     val id : Int,
-    val user_state : String
+    val user_state : String,
+    val name : String
 )
 
 data class LocalUser(

@@ -13,12 +13,12 @@ object GeneralDao{
     }
 
     fun getRoleAndState(id : String) : String{
-        val query = "select r.id, u.user_state from local_user u inner join user_role r on (u.roleID = r.id) where u.biometricID = '$id' "
+        val query = "select r.id, u.user_state, u.name from local_user u inner join user_role r on (u.roleID = r.id) where u.biometricID = '$id' "
 
         val rs = DBConnection.executeQuery(query)
         var result = ""
         while (rs!!.next()){
-            val obj = RoleAndStatus(rs.getInt("id"), rs.getString("user_state"))
+            val obj = RoleAndStatus(rs.getInt("id"), rs.getString("user_state"), rs.getString("name"))
             val mapper = ObjectMapper()
             result = mapper.writeValueAsString(obj)
         }
@@ -37,7 +37,7 @@ object GeneralDao{
 
         while (rs!!.next()){
             val usr = LocalUser(
-                rs.getInt("id"),
+                rs.getInt("jsonLOG"),
                 rs.getString("name"),
                 rs.getString("biometricID"),
                 rs.getString("user_state"),
@@ -63,9 +63,18 @@ object GeneralDao{
 	event_status nvarchar(20)
 * */
     fun insertLog(name : String, date : String, time : String, event : String){
-        val format = SimpleDateFormat("yyyy-MM-dd")
-        val dt = format.parse(date)
 
-        DBConnection.executeUpdate("INSERT INTO system_log VALUES ('$name','${format.format(dt)}','$time','$event')")
+        val query = "INSERT INTO system_log VALUES ('$name','$time','$date','$event')"
+
+        println(query)
+
+        DBConnection.executeUpdate(query)
+    }
+
+    fun parseJson(json : String) : String{
+        var result = json.replace("**","{")
+        result = result.replace("*","}")
+        result = result.replace("_",",")
+        return result
     }
 }

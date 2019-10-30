@@ -1,3 +1,5 @@
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import dao.GeneralDao
 import io.ktor.application.*
 import io.ktor.features.ContentNegotiation
@@ -30,7 +32,6 @@ fun main() {
             post("/getRoleAndState"){
                 val id = call.receiveText()
                 val resp = GeneralDao.getRoleAndState(id)
-                println(resp)
                 call.respondText { resp }
             }
             post("/changeUserState"){
@@ -43,12 +44,15 @@ fun main() {
             get("/insertLog"){
                 val queryParameters = call.request.queryParameters
 
-                GeneralDao.insertLog(
-                    queryParameters.get("name")!!,
-                    queryParameters.get("date")!!,
-                    queryParameters.get("time")!!,
-                    queryParameters.get("event")!!
-                )
+                val json = GeneralDao.parseJson(queryParameters.get("jsonLog")!!)
+
+                println(json)
+
+                val mapper = ObjectMapper()
+
+                val log = mapper.readValue<LogData>(json)
+
+                GeneralDao.insertLog(log.name, log.date, log.time, log.status)
 
                 call.respondText { "success" }
             }
@@ -68,3 +72,12 @@ data class ChangeState(
     val biometricID : String,
     val user_state : String
 )
+
+data class LogData(
+        val name : String,
+        val time : String,
+        val date : String,
+        val status : String
+){
+    constructor() : this("","","","")
+}
