@@ -67,6 +67,8 @@ fun main() {
             post("/getLogs"){
                 val json = GeneralDao.getLogs()
 
+                println(json)
+
                 call.respondText { json }
             }
         }

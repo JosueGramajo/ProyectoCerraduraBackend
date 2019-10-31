@@ -3,6 +3,7 @@ package dao
 import com.fasterxml.jackson.databind.ObjectMapper
 import database.DBConnection
 import objects.*
+import java.lang.Exception
 import java.text.SimpleDateFormat
 
 object GeneralDao{
@@ -64,30 +65,36 @@ object GeneralDao{
     }
 
     fun getLogs() : String{
-        val query = "SELECT * FROM system_log"
+        try{
+            val query = "SELECT * FROM system_log"
 
-        val rs = DBConnection.executeQuery(query)
+            val rs = DBConnection.executeQuery(query)
 
-        val format = SimpleDateFormat("yyyy-MM-dd")
+            val format = SimpleDateFormat("yyyy-MM-dd")
 
-        val list = arrayListOf<LogData>()
+            val list = arrayListOf<LogData>()
 
-        while (rs!!.next()){
-            val log = LogData(
-                    rs.getString("name"),
-                    format.format(rs.getDate("log_time")),
-                    rs.getTime("log_date").toString(),
-                    rs.getString("event_status")
-            )
+            while (rs!!.next()){
+                val log = LogData(
+                        rs.getString("name"),
+                        rs.getTime("log_time").toString(),
+                        format.format(rs.getDate("log_date")),
+                        rs.getString("event_status")
+                )
 
-            list.add(log)
+                list.add(log)
+            }
+
+            val listObj = LogList(list)
+
+            val mapper = ObjectMapper()
+
+            return mapper.writeValueAsString(listObj)
+        }catch (ex : Exception){
+            ex.printStackTrace()
         }
 
-        val listObj = LogList(list)
-
-        val mapper = ObjectMapper()
-
-        return mapper.writeValueAsString(listObj)
+        return ""
     }
 
     fun parseJson(json : String) : String{
